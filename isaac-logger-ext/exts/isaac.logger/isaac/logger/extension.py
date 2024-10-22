@@ -35,7 +35,7 @@ class IsaacLogger():
         self.log_file = os.path.join(logs_dir, file_name)
 
         # Inicializar contexto da simulação
-        self.simulation_context = World.instance()
+        self.simulation_context = SimulationContext.instance()
 
         # if self.simulation_context is None:
         #     raise RuntimeError("Simulation context is not initialized. Please ensure that the simulation is running.")
