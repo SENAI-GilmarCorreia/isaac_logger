@@ -1,0 +1,28 @@
+# https://docs.omniverse.nvidia.com/kit/docs/kit-manual/latest/guide/extensions_advanced.html#core-section
+[core]
+reloadable = true
+order = 0
+
+# https://docs.omniverse.nvidia.com/kit/docs/kit-manual/latest/guide/extensions_advanced.html#package-section
+[package]
+version = "0.1.0"
+category = "simulation"
+title = "Isaac ROS2 Commands"
+description = "Extension to send commands to Isaac Sim using a ROS2 services"
+authors = ["Gilmar Correia Jeronimo"]
+repository = ""
+keywords = ["ros2","commands"]
+changelog = "docs/CHANGELOG.md"
+readme = "docs/README.md"
+preview_image = "data/preview.png"
+icon = "data/icon.png"
+
+# https://docs.omniverse.nvidia.com/kit/docs/kit-manual/latest/guide/extensions_advanced.html#dependencies-section
+[dependencies]
+
+# https://docs.omniverse.nvidia.com/kit/docs/kit-manual/latest/guide/extensions_advanced.html#python-section
+[[python.module]]
+name = "omni.isaac.ros2"
+
+# https://docs.omniverse.nvidia.com/kit/docs/kit-manual/latest/guide/extensions_advanced.html#settings-section
+[settings]
