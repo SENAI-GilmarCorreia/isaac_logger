@@ -28,16 +28,20 @@ class IsaacROS2Extension(omni.ext.IExt):
     def on_startup(self, ext_id):
         print("[omni.isaac.ros2] Isaac ROS2 Extension Startup")
 
-        # Initialize the node
-        self.ros2_node = SceneLoaderService()
+        # Iniciar rclpy e configurar o nó ROS
+        rclpy.init()
+        self.node = SceneLoaderService()
+        self.executor = rclpy.executors.SingleThreadedExecutor()
+        self.executor.add_node(self.node)
 
-        # Register the update callback to check the simulation time continuously
-        self._update_sub = omni.kit.app.get_app().get_update_event_stream().create_subscription_to_pop(self._on_update)
-
-    def _on_update(self, event):
-        rclpy.spin_once(self.ros2_node)
+        # Rodar o executor do ROS em um thread separado
+        import threading
+        self.thread = threading.Thread(target=self.executor.spin, daemon=True)
+        self.thread.start()
 
     def on_shutdown(self):
+        # Encerrar o nó ROS e o executor
+        self.executor.shutdown()
         self.node.destroy_node()
         rclpy.shutdown()
 
