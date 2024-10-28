@@ -106,7 +106,7 @@ class IsaacLogger():
         # Get active objects in the scene
         objects_data = []
 
-        prim = self.stage.GetPrimAtPath("/Environment")
+        prim = self.stage.GetPrimAtPath("/World")
         # Check if the prim exists
         if prim.IsValid():
             for child in prim.GetChildren():
