@@ -1,26 +1,30 @@
 import carb
+import omni
 import rclpy
+import threading
 
 from rclpy.node import Node
-from std_srvs.srv import SetBool  # Exemplo de serviço, ajuste para o tipo que preferir
-import omni
+from isaac_pkgs.srv import ScenePath
 
 class SceneLoaderService(Node):
     def __init__(self):
-        super().__init__('scene_loader_service')
-    #     self.srv = self.create_service(SetBool, 'load_scene', self.load_scene_callback)
+        super().__init__('isaac_ros2')
+
+        # Services
+        self.load_scene_srv = self.create_service(ScenePath, 'load_scene', self.load_scene_callback)
     
-    # def load_scene_callback(self, request, response):
-    #     scene_name = request.name  # Atributo 'name' enviado no request
-    #     try:
-    #         # Carrega a cena usando a API do Isaac Sim
-    #         omni.usd.get_context().open_stage(scene_name)
-    #         response.success = True
-    #         response.message = f'Scene {scene_name} loaded successfully.'
-    #     except Exception as e:
-    #         response.success = False
-    #         response.message = str(e)
-    #     return response
+    def load_scene_callback(self, request, response):
+        scene_path = request.path
+        print(scene_path)
+        try:
+            # Carrega a cena usando a API do Isaac Sim
+            omni.usd.get_context().open_stage(scene_path)
+            response.success = True
+            response.message = f'Scene {scene_path} loaded successfully.'
+        except Exception as e:
+            response.success = False
+            response.message = str(e)
+        return response
 
 class IsaacROS2Extension(omni.ext.IExt):
     # ext_id is current extension id. It can be used with extension manager to query additional information, like where
@@ -35,7 +39,6 @@ class IsaacROS2Extension(omni.ext.IExt):
         self.executor.add_node(self.node)
 
         # Rodar o executor do ROS em um thread separado
-        import threading
         self.thread = threading.Thread(target=self.executor.spin, daemon=True)
         self.thread.start()
 

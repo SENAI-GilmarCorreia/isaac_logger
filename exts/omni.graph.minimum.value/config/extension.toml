@@ -1,0 +1,35 @@
+# https://docs.omniverse.nvidia.com/kit/docs/kit-manual/latest/guide/extensions_advanced.html#core-section
+[core]
+reloadable = true
+order = 0
+
+# https://docs.omniverse.nvidia.com/kit/docs/kit-manual/latest/guide/extensions_advanced.html#package-section
+[package]
+version = "0.1.0"
+category = "graph"
+title = "Minimum Value of an Array Node"
+description = ""
+authors = ["Gilmar Correia Jeronimo"]
+repository = ""
+keywords = ["kit", "omnigraph"]
+changelog = "docs/CHANGELOG.md"
+readme = "docs/README.md"
+preview_image = "data/preview.png"
+icon = "data/icon.png"
+
+# https://docs.omniverse.nvidia.com/kit/docs/kit-manual/latest/guide/extensions_advanced.html#dependencies-section
+[dependencies]
+"omni.kit.test" = {}
+"omni.graph" = {}
+
+# Watch the .ogn files for hot reloading (only works for Python files)
+[fswatcher.patterns]
+include = ["*.ogn", "*.py"]
+exclude = ["Ogn*Database.py"]
+
+# https://docs.omniverse.nvidia.com/kit/docs/kit-manual/latest/guide/extensions_advanced.html#python-section
+[[python.module]]
+name = "omni.graph.minimum.value"
+
+# https://docs.omniverse.nvidia.com/kit/docs/kit-manual/latest/guide/extensions_advanced.html#settings-section
+[settings]

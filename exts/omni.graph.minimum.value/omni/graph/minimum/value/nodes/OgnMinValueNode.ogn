@@ -1,0 +1,32 @@
+{
+    "MinValue": {
+        "version": 1,
+        "description": "Get min value from an numeric array",
+        "language": "Python",
+        "metadata": {
+            "uiName": "Min Value"
+        },
+        "inputs": {
+            "array": {
+                "type": "float[]",
+                "description": "input array",
+                "metadata": {
+                    "uiName": "Numeric Array"
+                },
+                "default": [
+                    0
+                ]
+            }
+        },
+        "outputs": {
+            "minimum": {
+                "type": "float",
+                "description": "minimum value",
+                "metadata": {
+                    "uiName": "Minimum"
+                },
+                "default": 0.0
+            }
+        }
+    }
+}

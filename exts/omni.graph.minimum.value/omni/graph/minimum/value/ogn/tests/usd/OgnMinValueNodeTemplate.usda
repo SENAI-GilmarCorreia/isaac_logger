@@ -1,0 +1,31 @@
+#usda 1.0
+(
+    doc ="""Generated from node description file OgnMinValueNode.ogn
+Contains templates for node types found in that file."""
+)
+
+def OmniGraph "TestGraph"
+{
+    token evaluator:type = "push"
+    int2 fileFormatVersion = (1, 3)
+    token flatCacheBacking = "Shared"
+    token pipelineStage = "pipelineStageSimulation"
+
+    def OmniGraphNode "Template_OmniNewExtensionExtension_MinValue" (
+        docs="""Get min value from an numeric array"""
+    )
+    {
+        token node:type = "OmniNewExtensionExtension.MinValue"
+        int node:typeVersion = 1
+
+        # 1 attribute
+        custom float[] inputs:array = [0] (
+            docs="""input array"""
+        )
+
+        # 1 attribute
+        custom float outputs:minimum = 0.0 (
+            docs="""minimum value"""
+        )
+    }
+}
