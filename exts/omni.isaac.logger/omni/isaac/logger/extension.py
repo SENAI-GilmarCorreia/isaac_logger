@@ -7,15 +7,16 @@ import omni.ext
 import omni.timeline
 import omni.physx
 import omni.ui as ui
-from pxr import UsdGeom
 from omni.isaac.core.utils.stage import get_current_stage
 from omni.isaac.core import SimulationContext
 from omni.isaac.core import World
 
+from pxr import Usd, UsdGeom, Sdf
+
 # Isaac Logger Extension
 
 class IsaacLogger():
-    def __init__(self):
+    def __init__(self, timeline):
 
         if 'NAAD_WS_DIR' not in os.environ:
             raise KeyError("Environment variable 'NAAD_WS_DIR' is not set.")
@@ -35,12 +36,13 @@ class IsaacLogger():
         self.log_file = os.path.join(logs_dir, file_name)
 
         # Inicializar contexto da simulação
-        self.simulation_context = SimulationContext()
-
-        if self.simulation_context is None:
-            raise RuntimeError("Simulation context is not initialized. Please ensure that the simulation is running.")
-        else:
-            self.simulation_context.initialize_physics()
+        self.timeline = timeline
+        if not self.timeline:
+            carb.log_error("Timeline interface not found")
+            return
+        
+        self.simulation_context = SimulationContext.instance()
+        self.stage = omni.usd.get_context().get_stage()
 
         # Variáveis de tempo e controle
         self.frame_count = 0
@@ -81,7 +83,6 @@ class IsaacLogger():
         return datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
     def collect_metrics(self, event):
-
         current_time = time.time()
         elapsed_time = current_time - self.last_time
 
@@ -94,28 +95,49 @@ class IsaacLogger():
         self.total_frames += 1
 
         #Get simulation step size (in ms)
-        if self.simulation_context is not None:
-            step_size = self.simulation_context.get_physics_dt() * 1000  # Convert to milliseconds
-        else:
-            step_size = 0
+        # if self.simulation_context.is_simulating():
+        #     step_size = self.simulation_context.get_physics_dt() * 1000  # Convert to milliseconds
+        # else:
+        step_size = 0
 
         # Get simulation time
-        sim_time = self.simulation_context.current_time()
-
+        sim_time = self.simulation_context.current_time
+        
         # Get active objects in the scene
-        stage = omni.usd.get_context().get_stage()
         objects_data = []
-        # for prim in stage.Traverse():
-        #     if UsdGeom.Xformable(prim).GetXformOpOrderAttr().IsValid():
-        #         pose = prim.GetAttribute('xformOp:transform').Get()
-        #         objects_data.append({"alias": prim.GetPath(), "pose": pose})
+
+        prim = self.stage.GetPrimAtPath("/Environment")
+        # Check if the prim exists
+        if prim.IsValid():
+            for child in prim.GetChildren():
+                child_name = child.GetName()
+
+                # Get the child prim
+                child_prim = self.stage.GetPrimAtPath(child.GetPath())
+
+                # Get the transform matrix
+                xformable = UsdGeom.Xformable(child_prim)
+                transform_matrix = xformable.ComputeLocalToWorldTransform(Usd.TimeCode.Default())
+
+                # Convert transform matrix to rotation quaternion
+                rotation_quat = transform_matrix.ExtractRotationQuat()
+                position = transform_matrix.ExtractTranslation()
+
+                # Extract the quaternion components
+                quat_x, quat_y, quat_z, quat_w = rotation_quat.GetReal(), rotation_quat.GetImaginary()[0], rotation_quat.GetImaginary()[1], rotation_quat.GetImaginary()[2]
+                
+                pose = [position[0], position[1], position[2], quat_x, quat_y, quat_z, quat_w]
+
+                objects_data.append({"alias": child_name, "pose": pose})
+        else:
+            print("Prim does not exist at the specified path.")
 
         print([
-                self.get_current_datetime(), 
+                self.get_current_datetime(),
                 self.total_frames, 
                 step_size, 
                 sim_time * 1000,
-                current_time * 1000, 
+                self.timeline.get_current_time() * 1000, 
                 (current_time - self.initial_time) * 1000,
                 None,
                 None,
@@ -168,7 +190,7 @@ class IsaacLoggerExtension(omni.ext.IExt):
     def _on_update(self, event):
         # Check if the simulation is playing
         if self.timeline.is_playing() and self.logger == None:
-            self.logger = IsaacLogger()
+            self.logger = IsaacLogger(self.timeline)
 
         elif self.timeline.is_playing() and self.logger != None:
             self.logger.collect_metrics(event)
